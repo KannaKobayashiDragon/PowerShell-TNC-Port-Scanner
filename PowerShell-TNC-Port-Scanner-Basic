@@ -1,0 +1,29 @@
+# Network TCP Connection Troubleshooting Script / Penetration Testing Open TCP Port Scanning Script 
+# Author: Edward Low
+
+# TCP Connection Configuration
+[string]$RemoteHost = "127.0.0.1"     # Destination System Identifier (Hostname, IP Address)- Example : localhost, 127.0.0.1
+[int]$InitialPort = 443               # Starting Port Number - Example : 1
+[int]$FinalPort = 445                 # Ending Port Number   - Example : 1024
+
+# Display scan initialization message
+Write-Output "Initiating Connectivity Test For TCP Ports ${InitialPort}-${FinalPort} On Target: $RemoteHost"
+
+# Iteration Ports in Range
+$InitialPort..$FinalPort | % {
+    [int]$CurrentPort = $_
+    
+    # Execute TNC Connection Test
+    $ConnectionResult = tnc -ComputerName $RemoteHost -Port $CurrentPort -WarningAction SilentlyContinue
+    
+    # Evaluate Connection Status
+    if ($ConnectionResult.TcpTestSucceeded) {
+        Write-Host "Port $CurrentPort : ACCESSIBLE on $RemoteHost" -ForegroundColor Green
+    }
+    else {
+      Write-Host "Port $CurrentPort : NOT-ACCESSIBLE on $RemoteHost" -ForegroundColor Red
+    }
+}
+
+# Completion Message
+Write-Host "Port/Connectivity Scan Completed For $RemoteHost" -ForegroundColor Cyan
