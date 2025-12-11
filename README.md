@@ -18,7 +18,6 @@ A production-ready PowerShell script that performs TCP port scanning using the n
 - ✅ Comprehensive input validation and error handling
 - ✅ Interactive or command-line modes
 - ✅ Color-coded output and detailed scan summaries
-- ✅ Export results to CSV/JSON via PowerShell pipeline
 
 ---
 
