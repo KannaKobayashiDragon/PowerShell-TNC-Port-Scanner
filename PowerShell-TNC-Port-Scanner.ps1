@@ -1,3 +1,30 @@
+<#
+.SYNOPSIS
+    Advanced PowerShell Network Port Scanner with CIDR Support
+
+.DESCRIPTION
+    PowerShell-TNC-Port-Scanner.ps1 - Enterprise-Grade TCP Port Scanning Utility
+    
+    This production-ready PowerShell script performs comprehensive TCP port scanning against
+    network targets using the Test-NetConnection cmdlet. Designed for network administrators,
+    security professionals, and IT auditors to identify open ports across single hosts, 
+    multiple IP addresses, or entire network ranges.
+
+.AUTHOR
+    Created for enterprise network administration and security operations
+
+.VERSION
+    2.0.1 - Production Release
+
+.NOTES
+    File Name      : PowerShell-TNC-Port-Scanner.ps1
+    Prerequisite   : PowerShell 5.1 or later
+    
+.LINK
+    https://docs.microsoft.com/powershell/module/nettcpip/test-netconnection
+
+#>
+
 function Invoke-NetworkPortScan {
     <#
     .SYNOPSIS
@@ -85,39 +112,76 @@ function Invoke-NetworkPortScan {
                     throw "Invalid subnet mask: $SubnetMask. Must be between 0 and 32."
                 }
                 
-                # Convert IP to binary (ensure correct endianness for UInt32 math)
-                [byte[]]$IpBytes = [System.Net.IPAddress]::Parse($NetworkAddress).GetAddressBytes()
-                [array]::Reverse($IpBytes)                                   # reverse to little-endian for BitConverter
-                [uint32]$IpInteger = [System.BitConverter]::ToUInt32($IpBytes, 0)
+                # Parse IP address into octets
+                [System.Net.IPAddress]$IPObject = [System.Net.IPAddress]::Parse($NetworkAddress)
+                [byte[]]$IpBytes = $IPObject.GetAddressBytes()
                 
-                # Calculate network parameters with safe bit operations
-                [uint32]$SubnetMaskInteger = [uint32]((-1) -shl (32 - $SubnetMask))  # e.g., /24 => 0xFFFFFF00
-                [uint32]$WildcardMask     = -bnot $SubnetMaskInteger -band 0xFFFFFFFF
-                [uint32]$NetworkInteger   = $IpInteger -band $SubnetMaskInteger
-                [uint32]$BroadcastInteger = $NetworkInteger -bor $WildcardMask
-                [uint32]$TotalHosts = $BroadcastInteger - $NetworkInteger - 1
+                # Convert to 32-bit integer using manual calculation (avoids signed integer issues)
+                [uint32]$IpInteger = ([uint32]$IpBytes[0] -shl 24) -bor 
+                                     ([uint32]$IpBytes[1] -shl 16) -bor 
+                                     ([uint32]$IpBytes[2] -shl 8) -bor 
+                                     ([uint32]$IpBytes[3])
                 
-                # Generate list of usable host IPs (excluding network and broadcast addresses)
+                # Calculate number of host bits
+                [int]$HostBits = 32 - $SubnetMask
+                
+                # Calculate number of addresses in subnet
+                [uint32]$TotalAddresses = [Math]::Pow(2, $HostBits)
+                
+                # Calculate subnet mask by creating all 1s then shifting
+                if ($SubnetMask -eq 0) {
+                    [uint32]$SubnetMaskInteger = 0
+                } else {
+                    # Build mask bit by bit to avoid overflow
+                    [uint32]$SubnetMaskInteger = 0
+                    for ([int]$i = 0; $i -lt $SubnetMask; $i++) {
+                        $SubnetMaskInteger = ($SubnetMaskInteger -shl 1) -bor 1
+                    }
+                    # Shift to proper position
+                    $SubnetMaskInteger = $SubnetMaskInteger -shl $HostBits
+                }
+                
+                # Calculate network address (clear host bits)
+                [uint32]$NetworkInteger = $IpInteger -band $SubnetMaskInteger
+                
+                # Calculate broadcast address (set all host bits)
+                [uint32]$BroadcastInteger = $NetworkInteger + ($TotalAddresses - 1)
+                
+                Write-Verbose "Network: $NetworkInteger, Broadcast: $BroadcastInteger, Total: $TotalAddresses"
+                
+                # Generate list of usable host IPs
                 [System.Collections.ArrayList]$ExpandedIPList = @()
                 
                 if ($SubnetMask -eq 32) {
-                    # Single host (/32)
+                    # Single host (/32) - only the network address itself
                     [void]$ExpandedIPList.Add($NetworkAddress)
                 }
                 elseif ($SubnetMask -eq 31) {
-                    # Point-to-point link (/31) - both IPs are usable
+                    # Point-to-point link (/31) - both addresses usable (RFC 3021)
                     for ([uint32]$CurrentHost = $NetworkInteger; $CurrentHost -le $BroadcastInteger; $CurrentHost++) {
-                        [byte[]]$HostBytes = [System.BitConverter]::GetBytes($CurrentHost)
-                        [array]::Reverse($HostBytes)                          # convert back to network byte order
-                        [string]$HostIP = [System.Net.IPAddress]::new($HostBytes).ToString()
+                        [byte]$Octet1 = ($CurrentHost -shr 24) -band 0xFF
+                        [byte]$Octet2 = ($CurrentHost -shr 16) -band 0xFF
+                        [byte]$Octet3 = ($CurrentHost -shr 8) -band 0xFF
+                        [byte]$Octet4 = $CurrentHost -band 0xFF
+                        [string]$HostIP = "$Octet1.$Octet2.$Octet3.$Octet4"
                         [void]$ExpandedIPList.Add($HostIP)
                     }
                 }
                 else {
-                    # Standard subnet - exclude network and broadcast
-                    for ([uint32]$CurrentHost = $NetworkInteger + 1; $CurrentHost -lt $BroadcastInteger; $CurrentHost++) {
-                        [byte[]]$HostBytes = [System.BitConverter]::GetBytes($CurrentHost)[3..0]
-                        [string]$HostIP = [System.Net.IPAddress]::new($HostBytes).ToString()
+                    # Standard subnet - exclude network and broadcast addresses
+                    [uint32]$FirstUsableHost = $NetworkInteger + 1
+                    [uint32]$LastUsableHost = $BroadcastInteger - 1
+                    
+                    Write-Verbose "Usable range: $FirstUsableHost to $LastUsableHost"
+                    
+                    for ([uint32]$CurrentHost = $FirstUsableHost; $CurrentHost -le $LastUsableHost; $CurrentHost++) {
+                        # Extract octets from 32-bit integer
+                        [byte]$Octet1 = ($CurrentHost -shr 24) -band 0xFF
+                        [byte]$Octet2 = ($CurrentHost -shr 16) -band 0xFF
+                        [byte]$Octet3 = ($CurrentHost -shr 8) -band 0xFF
+                        [byte]$Octet4 = $CurrentHost -band 0xFF
+                        
+                        [string]$HostIP = "$Octet1.$Octet2.$Octet3.$Octet4"
                         [void]$ExpandedIPList.Add($HostIP)
                     }
                 }
@@ -126,7 +190,7 @@ function Invoke-NetworkPortScan {
                 return $ExpandedIPList
             }
             catch {
-                Write-Error "Failed to parse CIDR notation: $_"
+                Write-Error "Failed to parse CIDR notation '$CIDRAddress': $_"
                 return @()
             }
         }
