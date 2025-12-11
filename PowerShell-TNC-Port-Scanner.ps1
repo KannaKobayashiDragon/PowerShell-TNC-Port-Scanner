@@ -85,14 +85,16 @@ function Invoke-NetworkPortScan {
                     throw "Invalid subnet mask: $SubnetMask. Must be between 0 and 32."
                 }
                 
-                # Convert IP to binary
+                # Convert IP to binary (ensure correct endianness for UInt32 math)
                 [byte[]]$IpBytes = [System.Net.IPAddress]::Parse($NetworkAddress).GetAddressBytes()
-                [uint32]$IpInteger = [System.BitConverter]::ToUInt32($IpBytes[3..0], 0)
+                [array]::Reverse($IpBytes)                                   # reverse to little-endian for BitConverter
+                [uint32]$IpInteger = [System.BitConverter]::ToUInt32($IpBytes, 0)
                 
-                # Calculate network parameters
-                [uint32]$SubnetMaskInteger = [uint32]([Math]::Pow(2, 32) - [Math]::Pow(2, (32 - $SubnetMask)))
-                [uint32]$NetworkInteger = $IpInteger -band $SubnetMaskInteger
-                [uint32]$BroadcastInteger = $NetworkInteger -bor (-bnot $SubnetMaskInteger)
+                # Calculate network parameters with safe bit operations
+                [uint32]$SubnetMaskInteger = [uint32]((-1) -shl (32 - $SubnetMask))  # e.g., /24 => 0xFFFFFF00
+                [uint32]$WildcardMask     = -bnot $SubnetMaskInteger -band 0xFFFFFFFF
+                [uint32]$NetworkInteger   = $IpInteger -band $SubnetMaskInteger
+                [uint32]$BroadcastInteger = $NetworkInteger -bor $WildcardMask
                 [uint32]$TotalHosts = $BroadcastInteger - $NetworkInteger - 1
                 
                 # Generate list of usable host IPs (excluding network and broadcast addresses)
@@ -105,7 +107,8 @@ function Invoke-NetworkPortScan {
                 elseif ($SubnetMask -eq 31) {
                     # Point-to-point link (/31) - both IPs are usable
                     for ([uint32]$CurrentHost = $NetworkInteger; $CurrentHost -le $BroadcastInteger; $CurrentHost++) {
-                        [byte[]]$HostBytes = [System.BitConverter]::GetBytes($CurrentHost)[3..0]
+                        [byte[]]$HostBytes = [System.BitConverter]::GetBytes($CurrentHost)
+                        [array]::Reverse($HostBytes)                          # convert back to network byte order
                         [string]$HostIP = [System.Net.IPAddress]::new($HostBytes).ToString()
                         [void]$ExpandedIPList.Add($HostIP)
                     }
