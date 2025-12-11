@@ -22,6 +22,16 @@ A production-ready PowerShell script that performs TCP port scanning using the n
 
 ---
 
+## 🤖 AI Coding Stack
+
+**AI Language Models & Their Roles:**
+- ✅ Gemini 3 Pro (Education License) : Used for advanced prompt engineering and idea exploration.
+- ✅ Cursor (Free Edition) : Assists with code refinement, debugging, and restructuring.
+- ✅ Claude Sonnet 4.5 (Free Edition) : Primary coding assistant for core development tasks.
+- ✅ ChatGPT (GPT-5.1, Free Edition) : Grammar rewriting, and technical prompt engineering.
+
+---
+
 ## 🚀 Quick Start
 
 ```powershell
