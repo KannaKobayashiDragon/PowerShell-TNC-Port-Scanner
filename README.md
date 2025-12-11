@@ -72,14 +72,11 @@ Invoke-NetworkPortScan
 
 ```powershell
 # Scan common ports
-Invoke-NetworkPortScan -TargetHost "server.local" -PortSpecification "22,80,443,3389"
+Invoke-NetworkPortScan -TargetHost "DC01" -PortSpecification "8080"
 
 # Scan port range with verbose output
-Invoke-NetworkPortScan -TargetHost "192.168.1.1" -PortSpecification "1-1024" -Verbose
+ Invoke-NetworkPortScan -TargetHost "192.168.102.207" -PortSpecification "8080,80,443" -Verbose
 
-# Export results to CSV
-Invoke-NetworkPortScan -TargetHost "10.0.0.0/28" -PortSpecification "445" | 
-    Export-Csv -Path "scan_results.csv" -NoTypeInformation
 ```
 
 ---
