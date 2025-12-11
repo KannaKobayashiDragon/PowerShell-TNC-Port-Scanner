@@ -102,7 +102,7 @@ Invoke-NetworkPortScan
 Invoke-NetworkPortScan -TargetHost "DC01" -PortSpecification "8080"
 
 # Scan port range with verbose output
- Invoke-NetworkPortScan -TargetHost "192.168.102.207" -PortSpecification "8080,80,443" -Verbose
+Invoke-NetworkPortScan -TargetHost "192.168.102.207" -PortSpecification "8080,80,443" -Verbose
 
 ```
 
