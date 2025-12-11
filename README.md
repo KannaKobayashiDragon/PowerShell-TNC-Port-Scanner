@@ -67,7 +67,7 @@ Invoke-NetworkPortScan
 Launch Windows PowerShell ISE
 
 # Download the script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KannaKobayashiDragon/PowerShell-TNC-Port-Scanner/main/PowerShell-TNC-Port-Scanner.ps1" -OutFile "PowerShell-TNC-Port-Scanner.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KannaKobayashiDragon/PowerShell-TNC-Port-Scanner/main/PowerShell-TNC-Port-Scanner-Advanced.ps1" -OutFile "PowerShell-TNC-Port-Scanner-Advanced.ps1"
 
 # Import the function (Do not use Import-Module)
 Paste The Script into Script section
