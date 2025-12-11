@@ -1,5 +1,4 @@
 # Network TCP Connection Troubleshooting Script / Penetration Testing Open TCP Port Scanning Script 
-# Author: Edward Low
 
 # TCP Connection Configuration
 [string]$RemoteHost = "127.0.0.1"     # Destination System Identifier (Hostname, IP Address)- Example : localhost, 127.0.0.1
