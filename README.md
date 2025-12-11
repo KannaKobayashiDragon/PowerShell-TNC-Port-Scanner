@@ -35,8 +35,17 @@ A production-ready PowerShell script that performs TCP port scanning using the n
 ## 🚀 Quick Start
 
 ```powershell
-# Download and import
+# Download the script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/[YourUsername]/PowerShell-TNC-Port-Scanner/main/PowerShell-TNC-Port-Scanner.ps1" -OutFile "PowerShell-TNC-Port-Scanner.ps1"
+
+# Script Bypass Policy PowerShell (cmd.exe)
+PowerShell -ep bypass 
+
+# Import the function
 . .\PowerShell-TNC-Port-Scanner.ps1
+
+# Verify it loaded correctly
+Get-Command Invoke-NetworkPortScan
 
 # Scan a single host
 Invoke-NetworkPortScan -TargetHost "192.168.1.100" -PortSpecification "80,443"
@@ -120,6 +129,12 @@ By using this tool, you acknowledge that:
 ## 📄 License
 
 MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please submit issues or pull requests on GitHub.
 
 ---
 
