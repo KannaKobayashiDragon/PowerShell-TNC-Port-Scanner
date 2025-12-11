@@ -41,7 +41,7 @@ PowerShell -ep bypass
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KannaKobayashiDragon/PowerShell-TNC-Port-Scanner/main/PowerShell-TNC-Port-Scanner-Advanced.ps1" -OutFile "PowerShell-TNC-Port-Scanner-Advanced.ps1"
 
 # Import the function (Do not use Import-Module)
-$scriptContent = Get-Content "PowerShell-TNC-Port-Scanner.ps1" -Raw -Encoding UTF8
+$scriptContent = Get-Content "PowerShell-TNC-Port-Scanner-Advanced.ps1" -Raw -Encoding UTF8
 Invoke-Expression $scriptContent
 
 # Verify it loaded correctly
