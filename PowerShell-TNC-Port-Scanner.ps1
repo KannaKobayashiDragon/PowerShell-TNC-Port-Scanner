@@ -417,7 +417,7 @@ function Invoke-NetworkPortScan {
     }
 }
 
-# Example usage (uncomment to run):
-# Invoke-NetworkPortScan -TargetHost "192.168.1.1" -PortSpecification "1-1024"
-# Invoke-NetworkPortScan -TargetHost "192.168.1.0/24" -PortSpecification "22,80,443"
-# Invoke-NetworkPortScan  # Interactive mode
+# Example usage - uncomment to run:
+# Invoke-NetworkPortScan -TargetHost 192.168.1.1 -PortSpecification 1-1024
+# Invoke-NetworkPortScan -TargetHost 192.168.1.0/24 -PortSpecification 22,80,443
+# Invoke-NetworkPortScan
