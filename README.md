@@ -113,12 +113,6 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🤝 Contributing
-
-Contributions welcome! Please submit issues or pull requests on GitHub.
-
----
-
 <div align="center">
 
 **Use Responsibly. Stay Legal. Get Permission.**
