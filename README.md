@@ -89,10 +89,10 @@ Invoke-NetworkPortScan
 ## 📋 Requirements
 
 - Windows 10/11 or Windows Server 2016+
-- Windows 7 does not support TNC (Test-NetConnection) PowerShell command
 - PowerShell 5.1 or later (pre-installed on Windows)
 - No external dependencies or modules required
-
+- Note: This script relies on the TNC(Test-NetConnection) cmdlet, which is not available on Windows 7.
+- Note: Consequently, Windows 7 is not supported, and no fallback methods (such as tcping) have been implemented.
 ---
 
 ## 💡 Usage Examples
